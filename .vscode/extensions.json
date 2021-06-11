@@ -1,0 +1,21 @@
+{
+  "recommendations": [
+    "aaron-bond.better-comments",
+    "alefragnani.bookmarks",
+    "streetsidesoftware.code-spell-checker",
+    "darkempire78.discord-tools",
+    "kp.discord-js-snippets",
+    "jasonhaxstuff.discord-js-tools",
+    "mhutchie.git-graph",
+    "donjayamanne.githistory",
+    "letmaik.git-tree-compare",
+    "eamodio.gitlens",
+    "brunnerh.insert-unicode",
+    "yzhang.markdown-all-in-one",
+    "eg2.vscode-npm-script",
+    "alexcvzz.vscode-sqlite",
+    "wayou.vscode-todo-highlight",
+    "gruntfuggly.todo-tree",
+    "chakrounanas.turbo-console-log"
+  ]
+}

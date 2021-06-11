@@ -1,0 +1,16 @@
+config.*
+.env
+
+data.*
+*.db
+
+*test*
+
+node_modules/
+package-lock.json
+
+old/
+
+# *.todo # is included because other todos are also included (directly in source code)
+
+# .vscode/
