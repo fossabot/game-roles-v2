@@ -2,6 +2,7 @@
   "cSpell.ignoreWords": [],
   "cSpell.words": [
     "creating",
+    "establecido",
     "guild",
     "mongodb",
     "ping",
@@ -9,7 +10,7 @@
     "todos",
     "wokcommands"
   ],
-  "cSpell.language": "de,en,de-DE,en-US",
+  "cSpell.language": "hr,ca,hr-HR,cs,da,da-DK,nl,nl-NL,en,en-GB,en-US,eo,fr,fr-FR,de,de-DE,el,he,it,it-IT,fa,fa-IR,pl,pl-PL,pt,pt-BR,pt-PT,sv,tr,tr-TR,uk,vi",
   "cSpell.enabledLanguageIds": [
     "asciidoc",
     "c",
