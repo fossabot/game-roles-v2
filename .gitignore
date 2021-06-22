@@ -4,7 +4,7 @@ config.*
 data.*
 *.db
 
-testing-not-mocha.js
+test.js
 mongodb-test/
 
 node_modules/
@@ -14,4 +14,4 @@ old/
 
 # *.todo # is included because other todos are also included (directly in source code)
 
-# .vscode/
+.vscode/
