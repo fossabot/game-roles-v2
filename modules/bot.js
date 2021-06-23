@@ -45,19 +45,18 @@ client.once('ready', () => {
   console.log('DISCORD.JS > Ready!');
 });
 
-client.on('presenceUpdate', function (oldMember, newMember) {
+client.on('presenceUpdate', async function (oldMember, newMember) {
   if (newMember.member.user.bot) return;
-  db.checkGuild(newMember.guild);
-  db.checkUser(newMember.user);
+  await db.checkGuild(newMember.guild);
+  await db.checkUser(newMember.user);
 
-  i = 0;
-  while (i < newMember.activities.length) {
+  for (const i in newMember.activities) {
     if (newMember.activities[i].name !== 'Custom Status') {
-      db.UserData.findOne({userID: newMember.user.toString}, (err, docs) => {
-        if(err) console.error(err);
-        if(!docs) {
+      db.UserData.findOne({ userID: newMember.user.id.toString(), activityName: newMember.activities[i].name }, (err, docs) => {
+        if (err) console.error(err);
+        if (!docs) {
           new db.UserData({
-            userID: newMember.id.toString(),
+            userID: newMember.user.id.toString(),
             activityName: newMember.activities[i].name,
             autoRole: true,
             ignored: false
@@ -65,15 +64,9 @@ client.on('presenceUpdate', function (oldMember, newMember) {
           console.log(`MONGODB > New activity: ${newMember.user.username} (${newMember.user.id}) plays ${newMember.activities[i].name}.`);
         }
       }).lean();
-      //// if (typeof db.prepare('SELECT * FROM users WHERE userID=? and activity=?').get(newMember.user.id.toString(), newMember.activities[i].name) === 'undefined') {
-      ////     db.prepare('INSERT INTO users (userID, activity, autoRole) VALUES (?, ?, 1)').run(newMember.user.id.toString(), newMember.activities[i].name);
-      ////     console.log(`SQLITE > New activity: ${newMember.user.username} (${newMember.user.id}) plays ${newMember.activities[i].name}.`
-      ////     );
-      //// }
     }
-    i++;
   }
-  checkRoles(newMember.member);
+  db.checkRoles(newMember.member);
 });
 
 client.on('guildCreate', function (guild) {
