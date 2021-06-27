@@ -1,16 +1,12 @@
 const Discord = require('discord.js');
 const WOKcommands = require('wokcommands');
-require('dotenv').config();
 
 const client = new Discord.Client();
 const db = require('./db.js');
 
-const { TOKEN } = require('../index.js');
 const config = require('../config.js');
 const { presence } = config;
 const testGuildIDs = ['782687651492790314'];
-
-var i = 0;
 
 function changeActivity() {
   if (presence.nextActivityNumber >= presence.activity.length) {
@@ -35,7 +31,7 @@ client.once('ready', () => {
     showWarns: false
   }).setBotOwner(config.botOwner)
     .setDisplayName('Game Roles V2')
-    .setMongoPath(MONGODB_URI);
+    .setMongoPath(config.MONGODB_URI);
 
   if (presence.activity.length > 0) {
     changeActivity();
@@ -45,7 +41,7 @@ client.once('ready', () => {
   console.log('DISCORD.JS > Ready!');
 });
 
-client.on('presenceUpdate', async function (oldMember, newMember) {
+client.on('presenceUpdate', async function(oldMember, newMember) {
   if (newMember.member.user.bot) return;
   await db.checkGuild(newMember.guild);
   await db.checkUser(newMember.user);
@@ -61,7 +57,7 @@ client.on('presenceUpdate', async function (oldMember, newMember) {
             autoRole: true,
             ignored: false
           }).save();
-          console.log(`MONGODB > New activity: ${newMember.user.username} (${newMember.user.id}) plays ${newMember.activities[i].name}.`);
+          console.log(`\nMONGODB > New activity: ${newMember.user.username} (${newMember.user.id}) plays ${newMember.activities[i].name}.`);
         }
       }).lean();
     }
@@ -69,29 +65,25 @@ client.on('presenceUpdate', async function (oldMember, newMember) {
   db.checkRoles(newMember.member);
 });
 
-client.on('guildCreate', function (guild) {
-  console.log(`DISCORD.JS > the client joined ${guild.name}`);
-  checkGuild(guild);
+client.on('guildCreate', function(guild) {
+  console.log(`\nDISCORD.JS > the client joined ${guild.name}`);
+  db.checkGuild(guild);
 });
 
-client.on('guildDelete', function (guild) {
-  console.log(`the client left ${guild.name}`);
+client.on('guildDelete', function(guild) {
+  console.log(`\nthe client left ${guild.name}`);
 });
 
-client.on('disconnect', function (event) {
-  console.log(
-    `DISCORD.JS > The WebSocket has closed and will no longer attempt to reconnect`
-  );
+client.on('disconnect', function(event) {
+  console.log('\nDISCORD.JS > The WebSocket has closed and will no longer attempt to reconnect');
 });
 
-client.on('error', function (error) {
-  console.error(
-    `DISCORD.JS > The client's WebSocket encountered a connection error: ${error}`
-  );
+client.on('error', function(error) {
+  console.error(`\nDISCORD.JS > The client's WebSocket encountered a connection error: ${error}`);
 });
 
 function connect() {
-  client.login(TOKEN);
+  client.login(config.TOKEN);
 }
 
 module.exports = { connect, client };

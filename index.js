@@ -1,23 +1,4 @@
 const Discord = require('discord.js');
-// const WOKcommands = require('wokcommands');
-require('dotenv').config();
-
-// const client = require('./modules/bot.js');
-// const { checkGuild, checkUser, checkRoles, checkAllRoles } = require('./old/db-14.06.2021-sqlite.js');
-
-// const help = require('./modules/help.js');
-// const config = require('./config.js');
-
-TOKEN = process.env.TOKEN;
-MONGODB_URI = process.env.MONGODB_URI;
-
-module.exports = {
-  MONGODB_URI,
-  TOKEN
-};
-
-
-//------------------------------------------------------------------------------------------------------------------
 
 require('./modules/db.js').connect();
 require('./modules/bot.js').connect();

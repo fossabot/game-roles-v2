@@ -6,7 +6,7 @@ const userDataSchema = new Schema({
     type: String,
     required: true
   },
-  activityName: { 
+  activityName: {
     type: String,
     required: true
   },

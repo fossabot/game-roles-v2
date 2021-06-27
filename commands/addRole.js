@@ -1,91 +1,78 @@
-const Discord = require("discord.js");
-const config = require("../config.js");
-const { db, checkGuild, checkUser, checkRoles, checkAllRoles } = require("../modules/db.js");
+const Discord = require('discord.js');
+const config = require('../config.js');
+const db = require('../modules/db.js');
 
 module.exports = {
+  name: 'addrole',
+  // aliases: ['p'],
   slash: true,
   testOnly: true,
-  description: "Add a GameRole to your guild!",
-  category: 'Fun & Games',
-  description: 'Replies with "Pong!"',
-  callback: ({ }) => {
-    if (!message.member.hasPermission("MANAGE_ROLES")) {
-      return ":x: You need to have the permission 'manage roles' to access this command! :x:";
+  description: 'Add a GameRole to your guild!',
+  category: 'Configuration',
+  expectedArgs: '<role> <activity> [included]',
+  minArgs: 2,
+  maxArgs: 3,
+  // syntaxError: 'Incorrect syntax! Use `{PREFIX}`ping {ARGUMENTS}',
+  permissions: ['MANAGE_ROLES'],
+  // cooldown: '60s',
+  // globalCooldown: '10m',
+  // hidden: false,
+  // ownerOnly: false,
+  // guildOnly: false,
+  callback: async ({ message, channel, args, text, client, prefix, instance, interaction }) => {
+    process.stdout.write(':');
+
+    const roleID = args[0].replace(/[\\<>@#&!]/g, '');
+    const activityName = args[1];
+    let only_included_allowed;
+    switch (args[2]) {
+    case 'yes':
+      only_included_allowed = true;
+      break;
+    case 'no':
+      only_included_allowed = false;
+      break;
+    case 'true':
+      only_included_allowed = true;
+      break;
+    case 'false':
+      only_included_allowed = false;
+      break;
+    case '1':
+      only_included_allowed = true;
+      break;
+    case '0':
+      only_included_allowed = false;
+      break;
+    default:
+      return ':x: wrong value for `ignored`. :x:';
+      break; //TODO?
     }
-    if (args < 2) {
-      message.channel.send(
-        new Discord.MessageEmbed()
-          .setColor(embedColor)
-          .setTitle(`Help with ${prefix}addRole / ${prefix}add`)
-          .addField(
-            "Usage:",
-            "`" +
-            `${prefix}addRole (/${prefix}add) <the role I give to users> <the game>` +
-            "`"
-          )
-          .addField(
-            "<the game>",
-            "You have to type the exact name (it has to be exactly exact), as it is only checked this way."
-          )
-          .setTimestamp()
-          .setFooter("© 2021 tippfehlr#3575", botOwnerLogoLink)
-      );
+
+    const role = channel.guild.roles.cache.get(roleID);
+    if (!role) {
+      return ':x: That role does not exist! :x:';
     } else {
-      i = 2;
-      let roleID = args[0].replace(/[\\<>@#&!]/g, "");
-      let activityName = args[1];
-      let roleName = "role not valid";
-
-      while (i < args.length) {
-        activityName = activityName + " " + args[i];
-        i++;
-      }
-
-      if (message.guild.roles.cache.get(roleID.toString())) {
-        roleName = message.guild.roles.cache.get(roleID);
-
-        if (
-          typeof db
-            .prepare(
-              "SELECT * FROM guilds WHERE guildID=? AND roleID=? AND activityNAME=?"
-            )
-            .get(message.guild.id, roleID, activityName) === "undefined"
-        ) {
-          db.prepare(
-            "INSERT INTO guilds (guildID, roleID, activityName) VALUES (?, ?, ?)"
-          ).run(message.guild.id, roleID, activityName);
-
-          message.channel.send(
-            new Discord.MessageEmbed()
-              .setColor(embedColor)
-              .setTitle("Set!")
-              .addField("Game:", activityName)
-              .addField("Role:", roleName)
-          );
-
-          console.log(
-            `SQLITE | New game role added: on guild ${message.guild.name} (${message.guild.id
-            }) role: ${message.guild.roles.cache.get(roleID).name
-            } (${roleID}) activityName: ${activityName}`
-          );
-        } else {
-          message.channel.send(
-            `:x: Error: this gameRole is already added! :x:`
-          );
-
-          console.log(
-            `SQLITE | game role already added: on guild ${message.guild.name} (${message.guild.id}) role: ${roleName} (${roleID}) activityName: ${activityName}`
-          );
-        }
+      if (await db.GuildData.findOne({ guildID: channel.guild.id.toString(), roleID: roleID, activityName: activityName })) {
+        return ':x: That GameRole already exists in this guild! Edit it with `/editRole`. :x:';
       } else {
-        message.channel.send(
-          `:x: Error: the role you specified does not exist :x:\n`
-        );
-        console.log(
-          `SQLITE | role invalid: on guild ${message.guild.name} (${message.guild.id}) role: ${roleName} (${roleID}) activityName: ${activityName}`
-        );
+        new db.GuildData({
+          guildID: channel.guild.id.toString(),
+          roleID: roleID,
+          activityName: activityName,
+          only_included_allowed: only_included_allowed
+        }).save();
+
+        console.log(`\nMONGODB > New game role added: on guild ${channel.guild.name} (${channel.guild.id}) role: ${role.name} (${roleID}) activityName: ${activityName}, included: ${only_included_allowed}`);
+
+        return new Discord.MessageEmbed()
+          .setColor(config.embedColor)
+          .setTitle('Set!')
+          .addField('Role:', role)
+          .addField('Activity:', activityName)
+          .addField('Included:', only_included_allowed);
       }
     }
-    checkAllRoles(message.guild);
-  },
+    // db.checkAllRoles(message.guild);
+  }
 };

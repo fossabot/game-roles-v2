@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 
 const config = require('../config.js');
-// const { MONGODB_URI } = require('../index.js');
 
 async function connect() {
-  await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+  await mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log('MONGODB > Connected to DB!');
   });
 }
@@ -17,82 +16,120 @@ const UserData = require('./models/userData.js');
 
 // @param guild: Discord guild object
 async function checkGuild(guild) {
-  if (!await GuildConfig.findById(guild.id.toString()).select("_id").lean()) {
+  process.stdout.write('.');
+  if (!await GuildConfig.findById(guild.id.toString()).select('_id').lean()) {
     new GuildConfig({
       _id: guild.id.toString()
     }).save();
-    console.log(`MONGODB > Added guild ${guild.name} (${guild.id}) to the database.`);
+    console.log(`\nMONGODB > Added guild ${guild.name} (${guild.id}) to the database.`);
   }
 }
 
 // @param user: Discord user object
 async function checkUser(user) {
+  process.stdout.write('.');
   if (!await UserConfig.findById(user.id.toString()).exec()) {
     await new UserConfig({
       _id: user.id.toString(),
       autoRole: true
     }).save();
-    console.log(`MONGODB > Added user ${user.username} (${user.id}) to the database.`);
+    console.log(`\nMONGODB > Added user ${user.username} (${user.id}) to the database.`);
   }
 }
 
-// // @param userID: String Discord ID of user
-// // @return UserConfig document or none
-// async function getUserConfig(userID) {
-//   return await UserConfig.findById(userID).lean();
-// }
-
-// // @param guildID: String Discord ID of user
-// // @return GuildConfig document or none
-// async function getGuildConfig(guildID) {
-//   return await GuildConfig.findById(guildID).lean();
-// }
-
 async function checkRoles(member) {
+  process.stdout.write('.');
   if (member.user.bot) return;
   await checkUser(member.user);
   await checkGuild(member.guild);
-  UserConfig.findById(member.user.id.toString(), (err, doc) => { if (!doc.autoRole) return; }).select('autoRole').lean();
+  if (await UserConfig.findById(member.user.id.toString()).select('autoRole').lean().autoRole) return;
+  const guildActivityList = await GuildData.find({ guildID: member.guild.id.toString() }).lean();
+  const userActivityList = await UserData.find({ userID: member.user.id.toString() }).lean();
 
-  var guildActivityList = undefined;
-  var userActivityList = undefined;
-  GuildData.find({ guildID: member.guild.id.toString() }, (err, docs) => { guildActivityList = docs }).lean();
-  UserData.find({ userID: member.user.id.toString() }, (err, docs) => { userActivityList = docs }).lean();
+  // const highestBotRole = member.guild.fetchMember(client.user);
+  // console.log('~ highestBotRole', highestBotRole);
 
   for (const x in guildActivityList) {
     if (guildActivityList[x].only_included_allowed) {
       for (const y in userActivityList) {
         if (!member.roles.cache.has(guildActivityList[x].roleID) && userActivityList[y].activityName.includes(guildActivityList[x].activityName)) {
           if (!userActivityList[y].ignored && !userActivityList[y].autoRole) {
-            const role = member.guild.roles.cache.find(role => role.id === guildActivityList[x].roleID);
+            const role = member.guild.roles.cache.find(_role => _role.id === guildActivityList[x].roleID);
             member.roles.add(role);
-            console.log(`DISCORD.JS > added Role ${role.name} (${guildActivityList[x].roleID}) to user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`)
+            console.log(`\nDISCORD.JS > added Role ${role.name} (${guildActivityList[x].roleID}) to user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`);
           }
         } else if (member.roles.cache.has(guildActivityList[x].roleID) && !userActivityList[y].activityName.includes(guildActivityList[x].activityName)) {
-          const role = member.guild.roles.cache.find(role => role.id === guildActivityList[x].roleID);
+          const role = member.guild.roles.cache.find(_role => _role.id === guildActivityList[x].roleID);
           member.roles.remove(role);
-          console.log(`DISCORD.JS > deleted Role ${role.name} (${guildActivityList[x].roleID}) from user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`)
+          console.log(`\nDISCORD.JS > deleted Role ${role.name} (${guildActivityList[x].roleID}) from user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`);
         }
       }
     } else {
-      let userActivityListFiltered = userActivityList.filter(elmt => elmt.activityName === guildActivityList[x].activityName)[0]
-      //user has activity but not role
-      if (!member.roles.cache.has(guildActivityList[x].roleID) && userActivityListFiltered) { //TODO: was ist userActivitylistFiltered wenn keine Elemente vorhanden sind?
+      const userActivityListFiltered = userActivityList.filter(elmt => elmt.activityName === guildActivityList[x].activityName)[0];
+      // user has activity but not role
+      if (!member.roles.cache.has(guildActivityList[x].roleID) && userActivityListFiltered) {
         if (userActivityListFiltered.autoRole && !userActivityListFiltered.ignored) {
-          const role = member.guild.roles.cache.find(role => role.id === guildActivityList[x].roleID);
-          member.roles.add(role);
-          console.log(`DISCORD.JS > added Role ${role.name} (${guildActivityList[x].roleID}) to user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`)
+          const role = member.guild.roles.cache.find(_role => _role.id === guildActivityList[x].roleID);
+          // member.roles.add(role);
+          console.log(`\nDISCORD.JS > added Role ${role.name} (${guildActivityList[x].roleID}) to user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`);
         }
 
       }
-      //user doesn't have activity but role
-      if (member.roles.cache.has(guildActivityList[x].roleID) && !userActivityListFiltered) { //TODO: was ist userActivitylistFiltered wenn keine Elemente vorhanden sind?
-        const role = member.guild.roles.cache.find(role => role.id === guildActivityList[x].roleID);
+      // user doesn't have activity but role
+      if (member.roles.cache.has(guildActivityList[x].roleID) && !userActivityListFiltered) {
+        const role = member.guild.roles.cache.find(_role => _role.id === guildActivityList[x].roleID);
         member.roles.remove(role);
-        console.log(`DISCORD.JS > deleted Role ${role.name} (${guildActivityList[x].roleID}) from user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`)
+        console.log(`\nDISCORD.JS > deleted Role ${role.name} (${guildActivityList[x].roleID}) from user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`);
       }
     }
   }
+}
+
+async function checkAllRoles(guild) {
+  process.stdout.write('.');
+
+  const guildActivityList = await GuildData.find({ guildID: guild.id.toString() }).lean();
+  await guild.members.cache.forEach(async (member) => {
+    if (member.user.bot) return;
+    await checkUser(member.user);
+    if (!await UserConfig.findById(member.user.id.toString()).select('autoRole').lean().autoRole) return;
+
+    const userActivityList = await UserData.find({ userID: member.user.id.toString() }).lean();
+    for (const x in guildActivityList) {
+      if (guildActivityList[x].only_included_allowed) {
+        for (const y in userActivityList) {
+          if (!member.roles.cache.has(guildActivityList[x].roleID) && userActivityList[y].activityName.includes(guildActivityList[x].activityName)) {
+            if (!userActivityList[y].ignored && !userActivityList[y].autoRole) {
+              const role = member.guild.roles.cache.find(_role => _role.id === guildActivityList[x].roleID);
+              member.roles.add(role);
+              console.log(`\nDISCORD.JS > added Role ${role.name} (${guildActivityList[x].roleID}) to user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`);
+            }
+          } else if (member.roles.cache.has(guildActivityList[x].roleID) && !userActivityList[y].activityName.includes(guildActivityList[x].activityName)) {
+            const role = member.guild.roles.cache.find(_role => _role.id === guildActivityList[x].roleID);
+            member.roles.remove(role);
+            console.log(`\nDISCORD.JS > deleted Role ${role.name} (${guildActivityList[x].roleID}) from user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`);
+          }
+        }
+      } else {
+        const userActivityListFiltered = userActivityList.filter(elmt => elmt.activityName === guildActivityList[x].activityName)[0];
+        // user has activity but not role
+        if (!member.roles.cache.has(guildActivityList[x].roleID) && userActivityListFiltered) { //TODO: was ist userActivitylistFiltered wenn keine Elemente vorhanden sind?
+          if (userActivityListFiltered.autoRole && !userActivityListFiltered.ignored) {
+            const role = member.guild.roles.cache.find(_role => _role.id === guildActivityList[x].roleID);
+            member.roles.add(role);
+            console.log(`\nDISCORD.JS > added Role ${role.name} (${guildActivityList[x].roleID}) to user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`);
+          }
+
+        }
+        // user doesn't have activity but role
+        if (member.roles.cache.has(guildActivityList[x].roleID) && !userActivityListFiltered) { //TODO: was ist userActivitylistFiltered wenn keine Elemente vorhanden sind?
+          const role = member.guild.roles.cache.find(_role => _role.id === guildActivityList[x].roleID);
+          member.roles.remove(role);
+          console.log(`\nDISCORD.JS > deleted Role ${role.name} (${guildActivityList[x].roleID}) from user: ${member.user.username} (${member.user.id}) on guild: ${member.guild.name} (${member.guild.id})`);
+        }
+      }
+    }
+  });
 }
 
 module.exports = {
@@ -100,8 +137,7 @@ module.exports = {
   checkGuild,
   checkUser,
   checkRoles,
-  // getUserConfig,
-  // getGuildConfig,
+  checkAllRoles,
 
   UserConfig,
   GuildConfig,
@@ -206,19 +242,19 @@ module.exports = {
 // }
 
 
-//// function checkGuild(guild) { // checks for and adds the guild to the database
-////    if (typeof db.prepare("SELECT * FROM guildData WHERE guildID=?").get(guild.id.toString()) == "undefined") {
-////         db.prepare("INSERT INTO guildData (guildID) VALUES (?)").run(guild.id.toString());
-////         console.log(`SQLITE > Added guild ${guild.name} (${guild.id}) to the database.`);
-////     }
-//// }
+/// / function checkGuild(guild) { // checks for and adds the guild to the database
+/// /    if (typeof db.prepare("SELECT * FROM guildData WHERE guildID=?").get(guild.id.toString()) == "undefined") {
+/// /         db.prepare("INSERT INTO guildData (guildID) VALUES (?)").run(guild.id.toString());
+/// /         console.log(`SQLITE > Added guild ${guild.name} (${guild.id}) to the database.`);
+/// /     }
+/// / }
 
-//// function checkUser(user) { // checks for and adds the user to the database
-////     if (typeof db.prepare("SELECT * FROM userData WHERE userID=?").get(user.id.toString()) == "undefined") {
-////         db.prepare("INSERT INTO userData (userID, autoRole) VALUES (?, 1)").run(user.id.toString());
-////         console.log(`SQLITE > Added user ${user.username} (${user.id}) to the database.`);
-////     }
-//// }
+/// / function checkUser(user) { // checks for and adds the user to the database
+/// /     if (typeof db.prepare("SELECT * FROM userData WHERE userID=?").get(user.id.toString()) == "undefined") {
+/// /         db.prepare("INSERT INTO userData (userID, autoRole) VALUES (?, 1)").run(user.id.toString());
+/// /         console.log(`SQLITE > Added user ${user.username} (${user.id}) to the database.`);
+/// /     }
+/// / }
 
 // function checkRoles(member) {
 //     if (member.user.bot) return;
