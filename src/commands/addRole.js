@@ -1,8 +1,7 @@
-const Discord = require('discord.js');
-const config = require('../config.js');
-const db = require('../modules/db.js');
+import config from '../config.js';
+import * as db from '../modules/db.js';
 
-module.exports = {
+const addRole = {
   name: 'addrole',
   // aliases: ['p'],
   slash: true,
@@ -76,3 +75,4 @@ module.exports = {
     // db.checkAllRoles(message.guild);
   }
 };
+export default addRole;

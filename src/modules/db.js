@@ -2,9 +2,9 @@
 import mongoose from 'mongoose';
 
 // const config = require('../config.js');
-import config from '../src/config.js';
+import config from '../config.js';
 
-export default async function connect() {
+export async function connect() {
   await mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log('MONGODB > Connected to DB!');
   });
@@ -21,7 +21,7 @@ import UserData from './models/userData.js';
 
 
 // @param guild: Discord guild object
-async function checkGuild(guild) {
+export async function checkGuild(guild) {
   process.stdout.write('.');
   if (!await GuildConfig.findById(guild.id.toString()).select('_id').lean()) {
     new GuildConfig({
@@ -32,7 +32,7 @@ async function checkGuild(guild) {
 }
 
 // @param user: Discord user object
-async function checkUser(user) {
+export async function checkUser(user) {
   process.stdout.write('.');
   if (!await UserConfig.findById(user.id.toString()).exec()) {
     await new UserConfig({
@@ -43,7 +43,7 @@ async function checkUser(user) {
   }
 }
 
-async function checkRoles(member) {
+export async function checkRoles(member) {
   process.stdout.write('.');
   if (member.user.bot) return;
   await checkUser(member.user);
@@ -91,7 +91,7 @@ async function checkRoles(member) {
   }
 }
 
-async function checkAllRoles(guild) {
+export async function checkAllRoles(guild) {
   process.stdout.write('.');
 
   const guildActivityList = await GuildData.find({ guildID: guild.id.toString() }).lean();
@@ -138,18 +138,7 @@ async function checkAllRoles(guild) {
   });
 }
 
-// module.exports = {
-//   connect,
-//   checkGuild,
-//   checkUser,
-//   checkRoles,
-//   checkAllRoles,
 
-//   UserConfig,
-//   GuildConfig,
-//   GuildData,
-//   UserData
-// };
 
 
 // // @param userID: Discord ID of User

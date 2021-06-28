@@ -1,12 +1,12 @@
 // const Discord = require('discord.js');
 // const WOKcommands = require('wokcommands');
 import Discord from 'discord.js';
-import WOKcommands from 'wokcomands';
+import WOKcommands from '../../node_modules/wokcommands/dist/index.js'; //TODO: Why?
 
-const client = new Discord.Client();
-const db = require('./db.js');
+export const client = new Discord.Client();
+import * as db from './db.js';
 
-const config = require('../config.js');
+import config from '../config.js';
 const { presence } = config;
 const testGuildIDs = ['782687651492790314'];
 
@@ -27,7 +27,7 @@ function changeActivity() {
 
 client.once('ready', () => {
   new WOKcommands(client, {
-    commandsDir: 'commands',
+    commandsDir: 'src/commands',
     // featuresDir: '../features',
     testServers: testGuildIDs,
     showWarns: false
@@ -84,8 +84,6 @@ client.on('error', function(error) {
   console.error(`\nDISCORD.JS > The client's WebSocket encountered a connection error: ${error}`);
 });
 
-export default function connect() {
+export function connect() {  
   client.login(config.TOKEN);
 }
-
-module.exports = { connect, client };
