@@ -1,4 +1,6 @@
 {
+  "name": "game-roles-v2",
+  "main": "src/index.js",
   "dependencies": {
     "discord.js": "^12.5.1",
     "dotenv": "^10.0.0",
