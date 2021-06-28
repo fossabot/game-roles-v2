@@ -1,4 +1,9 @@
 {
+  "name": "game-roles-v2",
+  "version": "0.1",
+  "description": "",
+  "type": "module",
+  "main": "src/index.js",
   "dependencies": {
     "discord.js": "^12.5.1",
     "dotenv": "^10.0.0",
@@ -6,11 +11,10 @@
     "wokcommands": "^1.3.6"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.28.0",
-    "@typescript-eslint/parser": "^4.28.0",
+    "@types/node": "^15.12.5",
     "chai": "^4.3.4",
-    "eslint": "^7.29.0",
-    "mocha": "^9.0.0"
+    "mocha": "^9.0.0",
+    "nodemon": "^2.0.7"
   },
   "scripts": {
     "test": "mocha"

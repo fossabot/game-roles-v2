@@ -1,7 +1,12 @@
 const Discord = require('discord.js');
 
-require('./modules/db.js').connect();
-require('./modules/bot.js').connect();
+import db from './modules/db.js';
+import bot from './modules/bot.js';
+
+db.connect();
+bot.connect();
+// require('../modules/db.js');
+// require('../modules/bot.js');
 
 
 //TODO: commands => ./commands

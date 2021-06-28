@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const guildDataSchema = new Schema({
@@ -21,4 +22,5 @@ const guildDataSchema = new Schema({
 }, { timestamps: true });
 
 const GuildData = mongoose.model('GuildData', guildDataSchema);
-module.exports = GuildData;
+export default GuildData;
+// module.exports = GuildData;

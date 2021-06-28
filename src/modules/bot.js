@@ -1,5 +1,7 @@
-const Discord = require('discord.js');
-const WOKcommands = require('wokcommands');
+// const Discord = require('discord.js');
+// const WOKcommands = require('wokcommands');
+import Discord from 'discord.js';
+import WOKcommands from 'wokcomands';
 
 const client = new Discord.Client();
 const db = require('./db.js');
@@ -82,7 +84,7 @@ client.on('error', function(error) {
   console.error(`\nDISCORD.JS > The client's WebSocket encountered a connection error: ${error}`);
 });
 
-function connect() {
+export default function connect() {
   client.login(config.TOKEN);
 }
 

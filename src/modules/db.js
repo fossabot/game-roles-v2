@@ -1,17 +1,23 @@
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const config = require('../config.js');
+// const config = require('../config.js');
+import config from '../src/config.js';
 
-async function connect() {
+export default async function connect() {
   await mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log('MONGODB > Connected to DB!');
   });
 }
 
-const UserConfig = require('./models/userConfig.js');
-const GuildConfig = require('./models/guildConfig.js');
-const GuildData = require('./models/guildData.js');
-const UserData = require('./models/userData.js');
+import UserConfig from './models/userConfig.js';
+import GuildConfig from './models/guildConfig.js';
+import GuildData from './models/guildData.js';
+import UserData from './models/userData.js';
+// const UserConfig = require('./models/userConfig.js');
+// const GuildConfig = require('./models/guildConfig.js');
+// const GuildData = require('./models/guildData.js');
+// const UserData = require('./models/userData.js');
 
 
 // @param guild: Discord guild object
@@ -132,18 +138,18 @@ async function checkAllRoles(guild) {
   });
 }
 
-module.exports = {
-  connect,
-  checkGuild,
-  checkUser,
-  checkRoles,
-  checkAllRoles,
+// module.exports = {
+//   connect,
+//   checkGuild,
+//   checkUser,
+//   checkRoles,
+//   checkAllRoles,
 
-  UserConfig,
-  GuildConfig,
-  GuildData,
-  UserData
-};
+//   UserConfig,
+//   GuildConfig,
+//   GuildData,
+//   UserData
+// };
 
 
 // // @param userID: Discord ID of User
