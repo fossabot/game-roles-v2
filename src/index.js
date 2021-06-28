@@ -1,7 +1,7 @@
-const Discord = require('discord.js');
 
-import db from './modules/db.js';
-import bot from './modules/bot.js';
+
+import * as db from './modules/db.js';
+import * as bot from './modules/bot.js';
 
 db.connect();
 bot.connect();
